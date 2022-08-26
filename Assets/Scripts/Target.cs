@@ -3,17 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
+[RequireComponent(typeof(AudioSource))]
 public class Target : MonoBehaviour
 {
     public Collider spawnArea;
     public float destroyDelay;
+
+
+    AudioSource audioSource;
+    public AudioClip targetHitSound;
+
+    private void Awake()
+    {
+        audioSource = this.GetComponent<AudioSource>();
+    }
     private void OnCollisionEnter(Collision collision)
     {
-        var foodCollidedWIth = collision.gameObject.GetComponent<XRGrabInteractable>();
-        if (foodCollidedWIth != null)
+        if (collision.gameObject.CompareTag("FoodItem") && GameManager.Instance.checkIsGameRunning())
         {
+            audioSource.PlayOneShot(targetHitSound);
             Destroy(collision.gameObject, destroyDelay);
             ChangeTargetPosition(spawnArea);
+
+            GameManager.Instance.AddScore();
+            GameManager.Instance.SpawnFoodItems();
         }
     }
 
